@@ -1,0 +1,74 @@
+﻿<Window x:Class="Presentation.Views.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:Presentation.Converters"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:views="clr-namespace:Presentation.Views"
+        Title="Stock Trade Sample Application" Height="605" Width="1002">
+    <Grid Margin="3,3,3,3">
+        <Grid.Resources>
+            <converters:ToGainLossConverter  x:Key="toGainLossConverter"/>
+            <Style x:Key="CellCenterAligned" TargetType="DataGridCell">
+                <Style.Setters>
+                    <Setter Property="TextBlock.TextAlignment" Value="Center" />
+                </Style.Setters>
+            </Style>
+            <Style x:Key="HeaderCenterAligned" TargetType="DataGridColumnHeader">
+                <Style.Setters>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                </Style.Setters>
+            </Style>
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="7*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <DataGrid Grid.Row="0" Name="dgStocks" ItemsSource="{Binding StocksCollection}"  Margin="3,3,3,3"
+                      AutoGenerateColumns="False"
+                      AlternationCount="2" 
+                      AlternatingRowBackground="WhiteSmoke"
+                      CanUserAddRows="False">
+            <DataGrid.Columns>
+                    <DataGridTextColumn Header="Symbol" Binding="{Binding Symbol}" Width="*" CellStyle="{StaticResource CellCenterAligned}" HeaderStyle="{StaticResource HeaderCenterAligned}"/>
+                    <DataGridTextColumn Header="Shares" Binding="{Binding Shares}" Width="*" CellStyle="{StaticResource CellCenterAligned}" HeaderStyle="{StaticResource HeaderCenterAligned}"/>
+                    <DataGridTextColumn Header="Last" Binding="{Binding Last, StringFormat=\{0:C2\}}" Width="*" CellStyle="{StaticResource CellCenterAligned}" HeaderStyle="{StaticResource HeaderCenterAligned}"/>
+                    <DataGridTextColumn Header="Cost Basis" Binding="{Binding CostBasis, StringFormat=\{0:C2\}}" Width="*" CellStyle="{StaticResource CellCenterAligned}" HeaderStyle="{StaticResource HeaderCenterAligned}" />
+                    <DataGridTextColumn Header="Market Value" Binding="{Binding MarketValue, StringFormat=\{0:C2\}}" Width="*" CellStyle="{StaticResource CellCenterAligned}" HeaderStyle="{StaticResource HeaderCenterAligned}"/>
+                    <DataGridTemplateColumn Header="Gain/Loss" Width="*" CellStyle="{StaticResource CellCenterAligned}" HeaderStyle="{StaticResource HeaderCenterAligned}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource toGainLossConverter}">
+                                        <Binding Path="CostBasis" />
+                                        <Binding Path="MarketValue" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate >
+                </DataGridTemplateColumn>
+                 <DataGridTemplateColumn Header="Actions" Width="auto" HeaderStyle="{StaticResource HeaderCenterAligned}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">   
+                                <Button Margin="3,3,3,3" Width="80" Content="Buy" Command="{Binding Path=DataContext.Buy, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" CommandParameter="{Binding}"/>
+                                <Button Margin="3,3,3,3" Width="80" Content="Sell"  Command="{Binding Path=DataContext.Sell, RelativeSource={RelativeSource AncestorType={x:Type DataGrid}}}" CommandParameter="{Binding}"/>
+                            </StackPanel>
+                            </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate >
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+            <views:TransactionsView DataContext="{Binding TransactionsViewModel}" Grid.Row="1" Margin="3,3,3,3"/>
+        </Grid>
+
+
+        <xctk:PropertyGrid Margin="3,3,3,3" Grid.Row="0" Grid.Column="1" SelectedObject="{Binding ElementName=dgStocks, Path=SelectedItem}" IsReadOnly="True" ShowSearchBox="False"/>
+    </Grid>
+</Window>
